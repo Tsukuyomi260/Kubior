@@ -8,7 +8,6 @@ function App() {
 
   useEffect(() => {
     const path = window.location.pathname
-    const params = new URLSearchParams(window.location.search)
 
     if (path === '/success') {
       setPage('success')
