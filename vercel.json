@@ -1,7 +1,1 @@
-{
-  "functions": {
-    "api/**/*.ts": {
-      "runtime": "node@20"
-    }
-  }
-}
+{}
