@@ -24,17 +24,47 @@ export default function Success() {
       return
     }
 
-    fetch(`/api/order?session_id=${sessionId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.error) {
-          setError(data.error)
-        } else {
-          setOrder(data)
+    let cancelled = false
+
+    // The webhook may take a moment to insert the order after redirect.
+    // Retry a few times before giving up.
+    const fetchOrder = async (attempt = 0): Promise<void> => {
+      const maxAttempts = 6
+      try {
+        const res = await fetch(`/api/order?session_id=${sessionId}`)
+        if (res.ok) {
+          const data = await res.json()
+          if (!cancelled) {
+            setOrder(data)
+            setLoading(false)
+          }
+          return
         }
-      })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false))
+        if (res.status === 404 && attempt < maxAttempts) {
+          setTimeout(() => fetchOrder(attempt + 1), 1500)
+          return
+        }
+        if (!cancelled) {
+          setError('Order not found')
+          setLoading(false)
+        }
+      } catch (err) {
+        if (attempt < maxAttempts) {
+          setTimeout(() => fetchOrder(attempt + 1), 1500)
+          return
+        }
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Error')
+          setLoading(false)
+        }
+      }
+    }
+
+    fetchOrder()
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   if (loading) {

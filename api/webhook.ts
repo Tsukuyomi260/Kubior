@@ -1,4 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node'
+import { Readable } from 'stream'
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 
@@ -12,6 +13,22 @@ const PACK_INFO: Record<string, number> = {
   decouverte: 5,
   famille: 15,
   mois: 30,
+}
+
+// Stripe signature verification needs the raw request body.
+// Disable Vercel's automatic body parsing for this route.
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+}
+
+async function readRawBody(readable: Readable): Promise<Buffer> {
+  const chunks: Buffer[] = []
+  for await (const chunk of readable) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk)
+  }
+  return Buffer.concat(chunks)
 }
 
 export default async function handler(
@@ -31,8 +48,9 @@ export default async function handler(
   let event: Stripe.Event
 
   try {
+    const rawBody = await readRawBody(req)
     event = stripe.webhooks.constructEvent(
-      req.body,
+      rawBody,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET!
     )
