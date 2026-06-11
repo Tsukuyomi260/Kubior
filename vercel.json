@@ -3,14 +3,5 @@
     "api/**/*.ts": {
       "runtime": "node@20"
     }
-  },
-  "env": [
-    "STRIPE_SECRET_KEY",
-    "STRIPE_WEBHOOK_SECRET",
-    "STRIPE_PRICE_DECOUVERTE",
-    "STRIPE_PRICE_FAMILLE",
-    "STRIPE_PRICE_MOIS",
-    "SUPABASE_URL",
-    "SUPABASE_SERVICE_ROLE_KEY"
-  ]
+  }
 }
