@@ -70,7 +70,7 @@ export default function Success() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">Chargement...</p>
+        <p className="text-stone-500">Chargement de votre commande…</p>
       </div>
     )
   }
@@ -80,7 +80,7 @@ export default function Success() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 mb-4">{error}</p>
-          <a href="/" className="text-blue-600 hover:underline">
+          <a href="/" className="text-green-700 hover:underline">
             Retour à l'accueil
           </a>
         </div>
@@ -89,12 +89,12 @@ export default function Success() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white shadow rounded-lg p-8 max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-stone-50 px-4">
+      <div className="bg-white shadow-lg rounded-2xl p-8 max-w-md w-full border border-stone-200">
         <div className="text-center mb-6">
-          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <svg
-              className="w-6 h-6 text-green-600"
+              className="w-7 h-7 text-green-700"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -107,36 +107,36 @@ export default function Success() {
               />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Merci pour votre commande!</h1>
+          <h1 className="text-2xl font-bold text-stone-900">Merci pour votre commande !</h1>
         </div>
 
         {order && (
-          <div className="bg-gray-50 rounded p-4 mb-6 space-y-2">
-            <p className="text-sm text-gray-600">
-              <span className="font-semibold">Numéro de commande:</span> {order.id}
+          <div className="bg-stone-50 rounded-xl p-4 mb-6 space-y-2 border border-stone-100">
+            <p className="text-sm text-stone-600">
+              <span className="font-semibold text-stone-800">Numéro de commande :</span> {order.id}
             </p>
-            <p className="text-sm text-gray-600">
-              <span className="font-semibold">Pack:</span> {order.pack_name}
+            <p className="text-sm text-stone-600">
+              <span className="font-semibold text-stone-800">Pack :</span> {order.pack_name}
             </p>
-            <p className="text-sm text-gray-600">
-              <span className="font-semibold">Quantité:</span> {order.quantity} sachets
+            <p className="text-sm text-stone-600">
+              <span className="font-semibold text-stone-800">Quantité :</span> {order.quantity} sachets
             </p>
-            <p className="text-sm text-gray-600">
-              <span className="font-semibold">Montant:</span> ${(order.amount_total / 100).toFixed(2)}
+            <p className="text-sm text-stone-600">
+              <span className="font-semibold text-stone-800">Montant :</span> ${(order.amount_total / 100).toFixed(2)}
             </p>
-            <p className="text-sm text-gray-600">
-              <span className="font-semibold">Email:</span> {order.customer_email}
+            <p className="text-sm text-stone-600">
+              <span className="font-semibold text-stone-800">Email :</span> {order.customer_email}
             </p>
           </div>
         )}
 
-        <p className="text-gray-600 text-sm mb-6 text-center">
+        <p className="text-stone-500 text-sm mb-6 text-center">
           Un email de confirmation vous a été envoyé.
         </p>
 
         <a
           href="/"
-          className="block w-full text-center bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+          className="block w-full text-center bg-green-700 text-white font-medium py-2.5 rounded-xl hover:bg-green-800 transition"
         >
           Retour à l'accueil
         </a>

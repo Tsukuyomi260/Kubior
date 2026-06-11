@@ -79,7 +79,13 @@ export default async function handler(
       })
 
       if (error) {
-        console.error('[webhook] Supabase insert error:', error)
+        // 23505 = unique_violation. Stripe retries events, so a duplicate
+        // stripe_session_id means we already saved this order. Treat as
+        // success (idempotent) so Stripe stops retrying.
+        if (error.code === '23505') {
+          return res.status(200).json({ received: true, duplicate: true })
+        }
+        console.error('[webhook] Supabase insert error:', error.code)
         return res.status(500).json({ error: 'Failed to save order' })
       }
 

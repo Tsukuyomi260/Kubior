@@ -19,7 +19,7 @@ function App() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-stone-50">
       {page === 'home' && <Home />}
       {page === 'success' && <Success />}
       {page === 'cancel' && <Cancel />}

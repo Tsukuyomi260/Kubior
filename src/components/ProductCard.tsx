@@ -7,6 +7,8 @@ interface ProductCardProps {
   priceFcfa: string
   priceUsd: string
   description: string
+  image?: string
+  popular?: boolean
 }
 
 export default function ProductCard({
@@ -16,8 +18,11 @@ export default function ProductCard({
   priceFcfa,
   priceUsd,
   description,
+  image,
+  popular = false,
 }: ProductCardProps) {
   const [loading, setLoading] = useState(false)
+  const [imgError, setImgError] = useState(false)
 
   const handleCheckout = async () => {
     setLoading(true)
@@ -42,23 +47,49 @@ export default function ProductCard({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
-      <div className="p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-2">{name}</h2>
-        <p className="text-gray-600 text-sm mb-4">{description}</p>
+    <div
+      className={`relative bg-white rounded-2xl overflow-hidden border transition hover:shadow-xl ${
+        popular ? 'border-amber-400 shadow-lg' : 'border-stone-200 shadow-sm'
+      }`}
+    >
+      {popular && (
+        <span className="absolute top-4 right-4 z-10 px-3 py-1 rounded-full bg-amber-600 text-white text-xs font-semibold">
+          Populaire
+        </span>
+      )}
 
-        <div className="mb-4 space-y-1">
-          <p className="text-sm text-gray-600">{sachets} sachets</p>
-          <p className="text-2xl font-bold text-gray-900">{priceFcfa}</p>
-          <p className="text-xs text-gray-500">(≈ {priceUsd})</p>
+      {/* Image / fallback */}
+      <div className="aspect-[4/3] bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center">
+        {image && !imgError ? (
+          <img
+            src={image}
+            alt={name}
+            className="w-full h-full object-cover"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <span className="text-5xl">🍲</span>
+        )}
+      </div>
+
+      <div className="p-6">
+        <h2 className="text-xl font-bold text-stone-900 mb-1">{name}</h2>
+        <p className="text-stone-500 text-sm mb-4">{description}</p>
+
+        <div className="mb-5 space-y-1">
+          <p className="inline-block px-2 py-0.5 rounded bg-green-50 text-green-700 text-xs font-medium">
+            {sachets} sachets
+          </p>
+          <p className="text-3xl font-bold text-stone-900 pt-2">{priceFcfa}</p>
+          <p className="text-xs text-stone-400">≈ {priceUsd} facturé en USD</p>
         </div>
 
         <button
           onClick={handleCheckout}
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition disabled:bg-gray-400"
+          className="w-full bg-green-700 text-white font-medium py-2.5 rounded-xl hover:bg-green-800 transition disabled:bg-stone-300 disabled:cursor-not-allowed"
         >
-          {loading ? 'Chargement...' : 'Commander'}
+          {loading ? 'Redirection…' : 'Commander'}
         </button>
       </div>
     </div>
