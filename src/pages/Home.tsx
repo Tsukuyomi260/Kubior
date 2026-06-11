@@ -9,7 +9,7 @@ const PRODUCTS = [
     priceFcfa: '2 500 FCFA',
     priceUsd: '$4.50',
     description: 'Parfait pour essayer notre bouillon naturel',
-    image: '/pack-decouverte.jpg',
+    image: '/pack-decouverte.jpeg',
     popular: false,
   },
   {
@@ -19,7 +19,7 @@ const PRODUCTS = [
     priceFcfa: '6 500 FCFA',
     priceUsd: '$11.50',
     description: 'Idéal pour toute la famille',
-    image: '/pack-famille.jpg',
+    image: '/pack-famille.jpeg',
     popular: true,
   },
   {
@@ -29,7 +29,7 @@ const PRODUCTS = [
     priceFcfa: '12 000 FCFA',
     priceUsd: '$21.50',
     description: "L'offre complète pour le mois",
-    image: '/pack-mois.jpg',
+    image: '/pack-mois.jpeg',
     popular: false,
   },
 ]
