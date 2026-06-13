@@ -3,6 +3,7 @@
 A small, production-style storefront that sells three packs of **Kubi'or** natural bouillon through **Stripe Checkout**. Built as a focused demo of a secure Stripe + webhook + database flow.
 
 **Live demo:** https://kubior.vercel.app
+**Walkthrough (90s):** https://www.loom.com/share/16e82e2649f8446faee09dab36e45dca
 
 🇫🇷 Version française : [README.fr.md](README.fr.md)
 

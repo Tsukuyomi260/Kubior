@@ -3,6 +3,7 @@
 Boutique React qui vend trois packs de bouillon naturel **Kubi'or** via **Stripe Checkout**. Démo d'un flux de paiement sécurisé : Stripe + webhook + base de données.
 
 **Démo en ligne :** https://kubior.vercel.app
+**Vidéo (90s) :** https://www.loom.com/share/16e82e2649f8446faee09dab36e45dca
 
 🇬🇧 English version: [README.md](README.md)
 
