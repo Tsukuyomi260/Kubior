@@ -53,7 +53,9 @@ export default async function handler(
 
     res.json({ url: session.url })
   } catch (error) {
-    console.error('[create-checkout-session]', error)
+    // Log only the message, never the full Stripe object (avoid leaking data).
+    const message = error instanceof Error ? error.message : 'unknown error'
+    console.error('[create-checkout-session]', message)
     res.status(500).json({ error: 'Failed to create checkout session' })
   }
 }

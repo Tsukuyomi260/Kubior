@@ -33,7 +33,8 @@ export default async function handler(
 
     res.json(data)
   } catch (error) {
-    console.error('[order] Error:', error)
+    const message = error instanceof Error ? error.message : 'unknown error'
+    console.error('[order] Error:', message)
     res.status(500).json({ error: 'Failed to fetch order' })
   }
 }

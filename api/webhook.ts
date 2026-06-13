@@ -55,7 +55,9 @@ export default async function handler(
       process.env.STRIPE_WEBHOOK_SECRET!
     )
   } catch (error) {
-    console.error('[webhook] Signature verification failed:', error)
+    // Log only the message — the raw body may contain customer data.
+    const message = error instanceof Error ? error.message : 'unknown error'
+    console.error('[webhook] Signature verification failed:', message)
     return res.status(401).json({ error: 'Invalid signature' })
   }
 
@@ -91,7 +93,9 @@ export default async function handler(
 
       res.json({ received: true })
     } catch (error) {
-      console.error('[webhook] Processing error:', error)
+      // Never log the session object (contains email + shipping address).
+      const message = error instanceof Error ? error.message : 'unknown error'
+      console.error('[webhook] Processing error:', message)
       return res.status(500).json({ error: 'Processing failed' })
     }
   } else {

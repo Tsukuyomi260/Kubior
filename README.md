@@ -1,131 +1,190 @@
 # Kubi'or Mini-Shop
 
-A production-ready e-commerce site for selling Kubi'or natural bouillon packs via Stripe Checkout.
+A small, production-style storefront that sells three packs of **Kubi'or** natural bouillon through **Stripe Checkout**. Built as a focused demo of a secure Stripe + webhook + database flow.
 
-## Features
+**Live demo:** https://kubior.vercel.app
 
-- 3 product packs (Découverte, Famille, Mois)
-- Stripe Checkout integration
-- Webhook signature verification
-- Supabase order persistence
-- Success/cancel pages
-- Mobile-responsive UI with Tailwind CSS
+🇫🇷 Version française : [README.fr.md](README.fr.md)
 
-## Tech Stack
+---
 
-- **Frontend**: React 18 + Vite + TypeScript + Tailwind CSS
-- **Backend**: Vercel Functions (Node.js)
-- **Payment**: Stripe Checkout
-- **Database**: Supabase (PostgreSQL)
+## What it does
 
-## Setup
+- One product page with three packs (Découverte, Famille, Mois)
+- Stripe Checkout (hosted) for payment
+- A Stripe webhook that **verifies the signature** and persists each paid order to Supabase
+- Success page that looks up the order by `session_id`
+- Cancel page for abandoned checkouts
 
-### 1. Clone & Install
+No user accounts, no cart, no inventory — by design. The point is a clean, secure payment pipeline.
 
-\`\`\`bash
-git clone <repo-url>
+---
+
+## How it works
+
+```
+Visitor → /                         (product page, 3 packs)
+   │  click "Commander"
+   ▼
+POST /api/create-checkout-session   (creates Stripe Checkout Session)
+   │  redirect
+   ▼
+Stripe Checkout (hosted)            (visitor pays with card)
+   │
+   ├─ redirect → /success?session_id=…  → GET /api/order → shows order
+   │
+   └─ event  → POST /api/webhook    (verify signature → INSERT into Supabase)
+```
+
+The browser never writes to the database. The **only** thing that creates an order is the signature-verified webhook.
+
+---
+
+## Tech stack
+
+| Layer    | Choice                                  |
+| -------- | --------------------------------------- |
+| Frontend | React 18 + Vite + TypeScript + Tailwind |
+| Payments | Stripe Checkout + Stripe Webhooks       |
+| Database | Supabase (PostgreSQL)                    |
+| Backend  | Vercel Functions (Node)                 |
+| Hosting  | Vercel                                  |
+| Motion   | framer-motion                           |
+
+---
+
+## Project structure
+
+```
+kubior/
+├── api/
+│   ├── create-checkout-session.ts   POST – creates a Checkout Session
+│   ├── webhook.ts                   POST – verifies signature, saves order
+│   └── order.ts                     GET  – fetches an order by session_id
+├── src/
+│   ├── components/  Header, ProductCard, Reveal
+│   ├── pages/       Home, Success, Cancel
+│   └── App.tsx      path-based routing
+└── vercel.json      SPA rewrite (non-/api routes → index.html)
+```
+
+---
+
+## Local setup
+
+```bash
+git clone https://github.com/Tsukuyomi260/Kubior.git
 cd kubior
 npm install
-\`\`\`
+cp .env.example .env.local   # then fill it in (see below)
+npm run dev                  # http://localhost:5173
+```
 
-### 2. Configure Stripe
+> `npm run dev` runs the **frontend only**. The `/api/*` functions are Vercel serverless functions and do not run under Vite. To run them locally, use `vercel dev`. The simplest way to test the full payment flow is the deployed site.
 
-1. Create a Stripe account (test mode)
-2. Create 3 products with prices:
-   - Découverte: $4.50 (5 sachets)
-   - Famille: $11.50 (15 sachets)
-   - Mois: $21.50 (30 sachets)
-3. Copy `.env.example` to `.env.local`
-4. Add keys:
-   - \`STRIPE_SECRET_KEY\` (sk_test_...)
-   - \`STRIPE_WEBHOOK_SECRET\` (whsec_...)
-   - \`STRIPE_PRICE_DECOUVERTE\`, \`STRIPE_PRICE_FAMILLE\`, \`STRIPE_PRICE_MOIS\` (price_...)
+---
 
-### 3. Configure Supabase
+## Configure Stripe
 
-1. Create a Supabase project
-2. Run SQL to create orders table:
+1. Create a Stripe account and stay in **test mode**.
+2. Create three products, each with a one-time price:
+   - Découverte — $4.50
+   - Famille — $11.50
+   - Mois — $21.50
+3. For each product, copy the **price ID** (`price_…`, **not** the product `prod_…`) into the matching env var.
+4. **Developers → Webhooks → Add endpoint:**
+   - URL: `https://YOUR-APP.vercel.app/api/webhook`
+   - Event: `checkout.session.completed`
+   - Copy the **signing secret** (`whsec_…`) into `STRIPE_WEBHOOK_SECRET`.
 
-\`\`\`sql
-CREATE TABLE orders (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  created_at timestamptz DEFAULT now(),
-  stripe_session_id text UNIQUE NOT NULL,
-  customer_email text NOT NULL,
-  pack_name text NOT NULL,
-  quantity int NOT NULL,
-  amount_total int NOT NULL,
-  currency text DEFAULT 'usd',
-  status text DEFAULT 'paid',
-  shipping_name text,
-  shipping_city text
+## Configure Supabase
+
+1. Create a Supabase project.
+2. In the SQL editor, create the `orders` table:
+
+```sql
+create table orders (
+  id                uuid primary key default uuid_generate_v4(),
+  created_at        timestamptz default now(),
+  stripe_session_id text unique not null,
+  customer_email    text not null,
+  pack_name         text not null,
+  quantity          int  not null,
+  amount_total      int  not null,
+  currency          text default 'usd',
+  status            text default 'paid',
+  shipping_name     text,
+  shipping_city     text
 );
 
-ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
-\`\`\`
+alter table orders enable row level security;
+-- No anon policies: the browser cannot read or write.
+-- All writes go through the webhook using the service-role key.
+```
 
-3. Add to `.env.local`:
-   - \`SUPABASE_URL\` (https://...supabase.co)
-   - \`SUPABASE_SERVICE_ROLE_KEY\` (service role key)
-   - \`VITE_SUPABASE_URL\` (same as SUPABASE_URL)
-   - \`VITE_SUPABASE_ANON_KEY\` (anon key)
+3. From **Settings → API**, copy the Project URL, the `anon` key, and the `service_role` key.
 
-### 4. Local Development
+---
 
-\`\`\`bash
-npm run dev
-\`\`\`
+## Environment variables
 
-Test webhooks with Stripe CLI:
+| Variable                    | Where        | Notes                                 |
+| --------------------------- | ------------ | ------------------------------------- |
+| `STRIPE_SECRET_KEY`         | server       | `sk_test_…`                           |
+| `STRIPE_WEBHOOK_SECRET`     | server       | `whsec_…`                             |
+| `STRIPE_PRICE_DECOUVERTE`   | server       | `price_…`                             |
+| `STRIPE_PRICE_FAMILLE`      | server       | `price_…`                             |
+| `STRIPE_PRICE_MOIS`         | server       | `price_…`                             |
+| `SUPABASE_URL`              | server       | project URL                           |
+| `SUPABASE_SERVICE_ROLE_KEY` | server only  | **never** exposed to the client       |
+| `VITE_SUPABASE_URL`         | client       | public                                |
+| `VITE_SUPABASE_ANON_KEY`    | client       | public anon key                       |
+| `VITE_SITE_URL`             | both         | base URL for success/cancel redirects |
 
-\`\`\`bash
-stripe listen --forward-to localhost:3000/api/webhook
-\`\`\`
+Add all of these in **Vercel → Project → Settings → Environment Variables**, then redeploy.
 
-### 5. Deploy to Vercel
+---
 
-1. Push to GitHub
-2. Import repo in Vercel
-3. Add environment variables (all from .env.local)
-4. Deploy
+## Deploy to Vercel
 
-## Flow
+1. Push to GitHub.
+2. Import the repo in Vercel.
+3. Add the environment variables above.
+4. Deploy — Vercel auto-detects Vite and builds the `api/` functions.
+5. Set the Stripe webhook endpoint to `https://YOUR-APP.vercel.app/api/webhook`.
 
-1. User selects pack → POST /api/create-checkout-session
-2. Stripe Checkout Session created, user redirected to Stripe
-3. User pays → Stripe sends checkout.session.completed webhook
-4. Webhook verifies signature → INSERT order into Supabase
-5. User redirected to /success?session_id=xxx
-6. Page fetches order details from GET /api/order?session_id=xxx
-7. Order confirmed displayed
+---
 
-## Security Notes
+## Testing
 
-- **Stripe Signature**: All webhooks verify \`stripe-signature\` header with constructEvent
-- **Service Role**: Only used in Vercel Functions, never exposed to client
-- **Idempotency**: \`stripe_session_id\` UNIQUE prevents duplicate orders
-- **No Direct Writes**: Frontend cannot write to Supabase; all writes via webhook
+Use a Stripe test card:
 
-## Price Notes
+```
+4242 4242 4242 4242   any future expiry   any CVC
+```
 
-- **Display**: FCFA (Beninese market)
-- **Processing**: USD (Stripe limitation, XOF not supported)
-- Conversion shown as approximation only
+Full flow: pick a pack → pay → land on `/success` with the order details → confirm a new row in the Supabase `orders` table.
 
-## Hors-scope
+**Signature check:** a `POST` to `/api/webhook` without a valid `stripe-signature` header returns **401**.
 
-- User authentication
-- Dynamic cart
-- Shipping calculation
-- Multi-language UI
-- Inventory management
-- Admin dashboard
-- Subscription mode
-- Custom email templates
+---
 
-## Resources
+## Security notes
 
-- [Stripe Checkout](https://docs.stripe.com/payments/checkout)
-- [Stripe Webhooks](https://docs.stripe.com/webhooks#verify-events)
-- [Vercel Functions](https://vercel.com/docs/functions)
-- [Supabase + Vercel](https://supabase.com/docs/guides/integrations/vercel)
+- **Webhook signature** is always verified with `stripe.webhooks.constructEvent` against the raw request body (Vercel body parsing is disabled for that route).
+- **Service-role key** is used only inside Vercel Functions, never shipped to the browser.
+- **No client writes:** the front end never inserts into Supabase; only the webhook does.
+- **Idempotency:** `stripe_session_id` is `UNIQUE`. A replayed event hits the unique constraint and returns `200` instead of creating a duplicate.
+- **Logs** contain error messages only — never the email, shipping address, or full Stripe objects.
+
+---
+
+## Currency note
+
+Prices are shown in **FCFA** for the Beninese market, but Stripe Checkout does not support **XOF**, so payments are charged in **USD**. The card amount equals the USD value shown in parentheses next to each pack.
+
+---
+
+## Out of scope (intentionally)
+
+Auth, dynamic cart, shipping calculation, inventory, multi-language UI, admin dashboard, subscriptions, custom transactional email (Stripe already sends the receipt).
