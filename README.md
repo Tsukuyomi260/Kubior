@@ -2,10 +2,24 @@
 
 A small, production-style storefront that sells three packs of **Kubi'or** natural bouillon through **Stripe Checkout**. Built as a focused demo of a secure Stripe + webhook + database flow.
 
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)
+![Tailwind](https://img.shields.io/badge/Tailwind-3-06B6D4?logo=tailwindcss&logoColor=white)
+![Stripe](https://img.shields.io/badge/Stripe-Checkout-635BFF?logo=stripe&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?logo=supabase&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-deployed-000000?logo=vercel&logoColor=white)
+
 **Live demo:** https://kubior.vercel.app
 **Walkthrough (90s):** https://www.loom.com/share/16e82e2649f8446faee09dab36e45dca
 
 🇫🇷 Version française : [README.fr.md](README.fr.md)
+
+![Kubi'or storefront](docs/screenshot.png)
+
+---
+
+**Contents:** [What it does](#what-it-does) · [How it works](#how-it-works) · [Tech stack](#tech-stack) · [Local setup](#local-setup) · [Stripe](#configure-stripe) · [Supabase](#configure-supabase) · [Env vars](#environment-variables) · [Deploy](#deploy-to-vercel) · [Testing](#testing) · [Security](#security-notes)
 
 ---
 
